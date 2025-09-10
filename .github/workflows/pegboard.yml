@@ -1,0 +1,28 @@
+name: Pegboard Digest
+
+on:
+  schedule:
+    # GitHub uses UTC. 15:00Z = 8:00 AM PT (during Daylight Time), 03:00Z = 8:00 PM PT (previous day).
+    - cron: "0 15 * * *"
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}   # allows you to run it on-demand from the Actions tab
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install requests beautifulsoup4
+      - name: Run digest
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          EMAIL_TO:  ${{ secrets.EMAIL_TO }}      # optional, if you added it
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}  # optional
+        run: python watch_vertical_digest.py
